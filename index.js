@@ -38,7 +38,13 @@ async function run() {
 
 
        app.get('/users',async(req,res)=>{
-      const cursor =  usersCollection.find()
+        const email = req.query.email;
+        const query = {}
+        if(email){
+          query.email=email;
+
+        }
+      const cursor =  usersCollection.find(query)
       const result =await cursor.toArray()
       res.send(result)
   })
@@ -55,6 +61,18 @@ async function run() {
     const result =await usersCollection.updateOne(query,update)
     res.send(result)
   })
+
+  app.patch('/user/updateProfile/:id',async(req,res)=>{
+    const id = req.params.id;
+    const updateProfile = req.body;
+    const query = {_id:new ObjectId(id)}
+    const update = {
+      $set:updateProfile
+    }
+    const result =await  usersCollection.updateOne(query,update)
+    res.send(result)
+  })
+  
 
     app.post('/users',async(req,res)=>{
       const newUser = req.body;
@@ -118,6 +136,26 @@ async function run() {
 
       }
       const result  = await booksCollection.updateOne(query,update)
+      res.send(result)
+    })
+
+    app.patch('/books/status/:id',async(req,res)=>{
+      const id = req.params.id;
+      const status = req.body;
+      const query = {_id:new ObjectId(id)}
+      const update= {
+        $set:{
+          status:status.status
+        }
+      }
+      const result = await booksCollection.updateOne(query,update)
+      res.send(result)
+    })
+
+    app.delete('/books/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id:new ObjectId(id)}
+      const result = await booksCollection.deleteOne(query)
       res.send(result)
     })
 
