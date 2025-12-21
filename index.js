@@ -87,6 +87,12 @@ async function run() {
       res.send(result)
     })
 
+    // app.get('/books/latest',async(req,res)=>{
+    //   const cursor = booksCollection.find().sort({createAt:-1}).limit(6)
+    //   const result = await cursor.toArray()
+    //   res.send(result)
+    // })
+
     app.get('/books/:id',async(req,res)=>{
       const id = req.params.id;
       const query = {_id:new ObjectId(id)}
@@ -97,7 +103,21 @@ async function run() {
 
     app.post('/books',async(req,res)=>{
       const newBook = req.body;
+    
+      newBook.createAt = new Date()
       const result = await booksCollection.insertOne(newBook)
+      res.send(result)
+    })
+    app.patch('/books/:id',async(req,res)=>{
+      const id = req.params.id;
+      const editBook = req.body;
+      console.log(editBook);
+      const query = {_id:new ObjectId(id)}
+      const update={
+        $set:editBook
+
+      }
+      const result  = await booksCollection.updateOne(query,update)
       res.send(result)
     })
 
@@ -113,10 +133,43 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result)
     })
+
+    //---librarian books order list-----
+
+    app.get('/orders/librarian',async(req,res)=>{
+      const {librarian_email} = req.query;
+      const query = {}
+      if(librarian_email){
+        query.librarian_email= librarian_email;
+      }
+      const cursor = ordersCollection.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
      
     app.post('/orders',async(req,res)=>{
       const orderBook = req.body;
       const result = await ordersCollection.insertOne(orderBook)
+      res.send(result)
+    })
+     app.delete('/orders/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id:new ObjectId(id)}
+      const result =await  ordersCollection.deleteOne(query);
+      res.send(result)
+     })
+
+    app.patch('/orders/:id',async(req,res)=>{
+      const id = req.params.id;
+      const deliveryStatus = req.body;
+      const query = {_id:new ObjectId(id)}
+      const update = {
+        $set:{
+          delivery_status:deliveryStatus.delivery_status
+        }
+      }
+      const result =await ordersCollection.updateOne(query,update)
       res.send(result)
     })
 
