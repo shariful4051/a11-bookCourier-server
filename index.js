@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //await client.connect();
     const db = client.db('bookCourier');
     const booksCollection = db.collection('books')
     const ordersCollection = db.collection('orders')
@@ -47,6 +47,12 @@ async function run() {
       const cursor =  usersCollection.find(query)
       const result =await cursor.toArray()
       res.send(result)
+  })
+  app.get('/users/:email/status',async(req,res)=>{
+    const email = req.params.email;
+    const query={email}
+    const user = await usersCollection.findOne(query)
+    res.send({status:user?.status || 'user'})
   })
 
   app.patch('/users/:id',async(req,res)=>{
@@ -105,11 +111,19 @@ async function run() {
       res.send(result)
     })
 
-    // app.get('/books/latest',async(req,res)=>{
-    //   const cursor = booksCollection.find().sort({createAt:-1}).limit(6)
-    //   const result = await cursor.toArray()
-    //   res.send(result)
-    // })
+    app.get('/books/published',async(req,res)=>{
+      const query = {status:"Published"}
+      const cursor= booksCollection.find(query)
+      const result = await cursor.toArray()
+      res.send(result);
+    })
+
+    app.get('/books/latest',async(req,res)=>{
+      const query = {status:'Published'}
+      const cursor = booksCollection.find(query).sort({createAt:-1}).limit(6)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
     app.get('/books/:id',async(req,res)=>{
       const id = req.params.id;
@@ -320,7 +334,7 @@ async function run() {
 
     
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+   // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
