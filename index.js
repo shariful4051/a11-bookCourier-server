@@ -48,11 +48,19 @@ async function run() {
       const result =await cursor.toArray()
       res.send(result)
   })
+
   app.get('/users/:email/status',async(req,res)=>{
     const email = req.params.email;
     const query={email}
     const user = await usersCollection.findOne(query)
     res.send({status:user?.status || 'user'})
+  })
+
+  app.get('/users/:email/user',async(req,res)=>{
+    const email = req.params.email;
+    const query ={email}
+    const user2 = await usersCollection.findOne(query)
+    res.send({user2:user2})
   })
 
   app.patch('/users/:id',async(req,res)=>{
